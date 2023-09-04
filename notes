@@ -1,0 +1,523 @@
+# React
+
+React is a library not framework
+
+React is component based
+Declarative
+State-driven
+
+React uses:
+Virtual DOM
+Fiber tree
+One way data flow
+
+Useful extensions: ESLint, Material icon theme, ES7+ React/Redux/React-Native snippets, One monokai theme.
+
+All assets should be in 'public' folder cos webapack automatically gets it from there
+#36
+
+A Component has a Data, Logic, and Appeareance.
+JSX combines html, css and javascript.
+
+Separation of concerns: it used to be one technology/file. Its now component/file.
+
+State is internal data that can be updated by the components
+Props is external data that can only be updated by the parent component
+
+# A component should not mutate a data coming from outside of it.
+
+React uses one-way data flow. data can only flow from parent to children and not the other way.
+
+When using conditional rendering, always use a boolean variable and not a truthy/falsy variable.
+
+We can't use if/else in jsx, cos we need to use syntaxes that produce a result/data, if/else doesn't.
+
+Use the tenary operator when you want to return a jsx based on a condition
+
+A react fragment lets us group some elements without leaving any trace in the DOM tree. <></>
+We can use <React.Fragment key={id}></React.Fragmrnt> if you need to pass a key
+
+State allows developers to:
+
+1. Update the component's view (by re-rendering it)
+2. Persist local variables between renders
+
+NB: react hooks can only be used in the top level scope of the react tree.
+
+install chrome react devtools
+#64, 2:25
+
+We use 'controlled elements' approach to handle our forms in react.
+In this approach, it is React that controls the form rather than the DOM.
+We follow 3 basic steps for this:
+`We create a state
+`Assign each state to the form data to be monitored as its value,
+`include an onchange to monitor change
+
+State is more like the components memory (way of persisiting data)
+Props is external data from a parent component
+
+# THINKING IN REACT:
+
+$ Break UI into components and establish connection
+$ Build a static version in react (without state)
+$* Think about state: when to use it, local vs global states, where to place each piece of state
+$\* Establish data flow: One-way data flow, chil-parent, accessing global state
+[The steps with asterisks are what constitute state management]
+
+# State management:
+
+is deciding when to create pieces of state, what types of state are ncecssary, where to place them and how data flows. => Giving each piece of state a HOME.
+
+#80
+We practicalized "lifting up state".
+React has a one-way flow of data but if a state lives in a component and is needed in a sibling component, then we
+need to lift the state up to the nearest parent, if the state needs to then be updated by its initial owner component then we can use a 'child-to-parent' communication by using a fn that houses the state's fn and is passed as props and is updated from its child.
+
+Deriving state: deriving data from a state instead of creating multiple states. This makes us have a single source
+of truth whilst ensuring our data is in sync. We use regular variables for this.
+
+An early return might be a good case scenario in some use cases
+
+Children props refers to everything in-between an opening and closing tag of a jsx component.
+
+#91
+When we have to pass down props through sveral components, thats prop-filling and it can become an issue we must fix.
+
+When you have a form, its better to have your handleSubmitFn inside the same component with the form, then you can add anyother external fn as a props (usually from the parent).
+But for other stuffs, jonas's convention is to decalre the fn in the parent and pass 'em as a
+props to the component that needs it.
+
+#105
+
+COURSE SECOND PHASE:
+How to think about components, Composition, Reusablilty, How to split a component, Building layouts.
+
+# How to split a UI into components:
+
+- Logical separation of content/layout
+- Reusability
+- Responsibilities/Complexity
+- Personal coding style
+
+* If youre unsure, You can start with a big component and then split as needed while building your app
+  NB: Creating new components causes abstraction which requires more mental energy top go back and forth so dont create new components too early,
+  Never create a component inside another component !!!
+
+  # Component Categories:
+
+  Stateless/Presentational: recieves and presents data
+  Stateful: has state
+  Structural: Usually the pages, layout or screen of the app. (result of composition)
+
+# Component composition (a solution to prop drilling)
+
+is making components reusable by passing other components into them as children rather than binding them directly. We say we compose them together. :)
+Jonas version: combining different components usingthe children prop (or explicitely defined props)
+
+- We use component composition when we want to:
+
+1. create highly reusable/flexible component 2. fix prop drilling (great for layouts)
+   NB: We can also pass elements as props an alternative to children
+
+#115
+We can set a default value on a prop incase we dont pass it in.
+
+Building the reusable star component is a great experience 🎉🚀 !!!
+
+prop-types is a package that comes with the react folder and is used to set prop types,
+[use typescript instead though]
+
+# PROPS AS A COMPONENT API:
+
+Component consumer <================================= Component creator
+#121
+
+# HOW REACT WORKS BEHIND THE SCENE:
+
+Component vs Instance vs Element
+
+Component:
+
+- description of a piece of UI,
+  -a fn that returns React elements (element tree) in jsx,
+  -Blueprint/Template.
+
+Instance:
+
+- are created when we use components,
+  -actual manifestation of a component
+- has its own state and props
+- has a lifecycle (can be born, live and die)
+
+Element:
+
+- a component instance returns a React Element
+- contains all the info necessary to craete DOM elements
+
+DOM Element (HTML):
+
+- actual visual representation of the component instance in the browser
+
+# HOW RENDERING WORKS:
+
+how does react convert react element to dom element rendered on the screen.
+Render phase => Commit phase.
+
+A render is triggered in 2 phase: Initial phase, when State is updated.
+
+# NOTE:
+
+Re-rendering doesnt mean updating th entire DOM but it means calling the component and replacing the changes made to it, (or we can say its the virtual DOM thats re-created).
+
+- Rendering a component will cause all of its child components to be rendered as well
+
+The "Virtual DOM" is a tree of all the elements created from all the instances in the component tree.
+
+Fiber is a reconciller in the react engine that updates the fiber tree.
+Reconciliation decides which DOM elements need to be inserted, updated or deleted
+Fiber tree is an internal tree (in form of a linked list) that has a 'fiber' for each component instance and DOM element.
+The process of reconciliation is called 'diffing'
+
+React Libarary is not the one responsible for writing to the DOM, cos react was made to be used for many hosts which the DOM is just one of. ReactDOM does the writing to the DOM.
+
+Render phase is asynchronous but commit phase is synchronous
+
+# Fiber tree
+
+is created upon the initial render of a react app and are not recreated upon re-render, instead it updates with changes and controlls the updates on the actual DOM.
+works asynchronoously
+
+# How diffing works:
+
+2 case scenarios:
+
+1. Same position, different element:
+   React assumes entire sub tree is no longer valid and removes old components from the DOM with their states
+2. Same position, Same element:
+   everything stays same and new props/attributes are passed if they change btw renders but sometimes we dont want that so we can use the key props cos the key prop is a special prop that we use to tell the diffing algorithim that an element is unique...
+   so when a key changes btw renders, the element is destroyed and a new one is made in its place.
+
+# So we use keys: in lists, to reset state. ALWAYS USE KEYS !!!
+
+# Rules for render :
+
+2 types of logics in react:
+
+- Render logic: usually code that lives at the top level of the component fn and participates in describing how the component looks like.
+
+- Event handler fns:
+  fns executed as a consequence of the event that the handler is listening for,
+  its the code that actually does things, update state, perform http request, navigate to another page, etc.
+
+  FUNCTIONAL PROGRAMMING PRINCIPLES:
+  Side effect: modification of data outside the fn scope, an outisde variable mutation.
+  Pure fns: fns without side effects, does not change any variable outside the scope.
+
+  # Rules of what to not do in a render logic (render logic must produce no side effect):
+
+  Do not perform network requests (API calls)
+  Do not start timers
+  Do not directly use the DOM API
+  Do not mutate objects/variables that are outside the fn scope
+  Do not update state (or refs) [creates an infinite loop]
+
+  # However side effects are allowed in eventhandler fns, we also have a special hook(useEffect)
+
+# Note that state updates in a fn in react are batched, i.e all the code inside are ran and creates a new state that is batched together before it goes to the render and commit phase. So updated state variables are not immediately available after setState call, but only after the re-render.
+
+After seeing some shege, i need to concur with jonas that useEffect is usuualy used as a synchronizing hook. (map lat&long incase you remember😅)
+
+BATCHING IS A PRETTY IMPORTANT TERMINOLOGY IN REACT
+
+Stale state is when our state has not been updated but still contains the current state after changing it, this occurs between the updating and rerendering phase.
+
+React 17 only allowed batching in event handlers but React 18 made batching possible in timeouts, promises and native events
+
+We can opt-out of automatic batching by wrapping a state update in ReactDOM.flushSync().
+
+# How event works in React:
+
+Event propagation and delegation (vanilla js):
+capturing phase ===> bubbling phase.
+Event delegation is handling events for multiple elements centrally in one single element.
+
+In react, all event handles are registered on the rootDOM container, this is where all events are handled. So React performs event delegation for all our events in our apps.
+Note that in event handling, its the DOM tree that matters not the component tree
+
+For events, React uses synthetic events so that events work same across all browsers, it is very similar to the native DOM event object and has all the important methods.
+Not so important tip: You can attach 'capture' if you need to handle an event during the capture phase. e.g onClickCapture.
+
+# Libraries vs Framework & the react ecosystem:
+
+Frameowork is like an "all-in-one" kit for a sushi meal, i.e it includes everything you need to build your apps e.g: angular, svelte.
+
+Libraries is like using the "separate ingredients" approach, choosing everything you want to use yourself. e.g REACT. allows the use of external libraries. This means FREEDOM 🚀
+
+# React has a rich ecosystem:
+
+Routing (for SPAs) => Raect router
+HTTP requests => javascript fetch, axios
+Remote state management => React Query
+Global state management => Context API, Redux
+Styling => CSS modules, styled components, tailwindcss
+Form managment => React Hook Form, Formik
+Animation => Motion
+UI Components => Chakra
+
+Opinionated React frameworks: they each have selected tools to take care of the above services (so you dont need to worry about teh stress of selecting what to use), they are:
+NEXT.js, Remix, Gatsby.
+Some of this opinionated frameowrks have additional features such as server-side rendering, static site generation.
+
+# Component Lifecycle:
+
+Mount/Initial render => Re-render (state/props/context\* changes, parent rerenders) => Unmount (component instance is destroyed and removed, state and props are destroyed).
+
+Side effects are made in eventhandlers (more recommended) and effects, effects allow us to write code that will run at diiferent moments: mount, re-render, or unmount.
+
+UseEffect has 3 parts: the code to be ran, a cleanup fn which runs before the component unmounts, and the dependency array.
+
+# The useEffect dependency array:
+
+Each time one of the dependencies changes, the effect will be executed again.
+Every state or prop used inside the effect MUST be included in the dependency array, otherwise we get a 'stale closure'
+
+if we dont pass a dependency array, the effect runs on every render
+
+UseEffect are like event listeners listening for one dependency to change, whenever a dependency changes, it will execute the effect again.
+UseEffect is a *synchronization mechanism and is deeply connected with the *component lifecycle.
+
+# UseEffects are executed after the component are rendered and the browser has been painted.
+
+So if an effect sets state, an additional render will be required. so dont overuse useEffect !!
+Another type of effect is the layout effect and it runs before the browser paint but its not an important effect so never mind.
+
+#154
+
+# The UseEffect cleanup function:
+
+is a fn that we can return from an effect
+Runs on 2 occasions: Before the effect is executed again and after the component has unmounted.
+A clean up fn is necessary whenever the (result of the) side effect keeps persisting (which is usually the case) after the component has been re-rendered or unmounted\*. Example: http request ->cancel, start timer->stop, add event listener -> remove.
+
+NB: Use different useEffect for different tasks, so its easy to understand and clean up.
+A closure in javascript implies that javascript will always remember a variable at the time and place it was created, explains why we can use variables in our useeffect fn inside the cleanup fn.
+
+Might sound obvious but, always clean up your data fetch to avoid race condition issues
+
+#159
+Hooks...
+
+# React Hooks:
+
+are special built-in fns that allows us to "hook" into React internals.
+Some useful ones are: useState, useEffect, useReducer, useContext, useRef, useCallback, useMemo, useTransition, useDeferredValue.
+
+# Rules of hooks:
+
+Only call hooks at the top level (not in conditionals, loops, nested fns, or after an early return) = to ensure that hooks are called in the same order, they are saved using an index order .
+
+Only call hooks from React fns (a fn component, custom hook).
+
+Initializing/setting an hook only matters/runs on the initial render.
+
+State updating is asynchronous so we cannot access it immediately after setting it, until after the code runs and the view rerender. That point where we cant access the state data yet is called "stale state".
+
+# Whenever the initial useState value depends on some computation, always pass in a fn rather than calling a fn
+
+# useState summary:
+
+While creating a state, we can use the normal way or use "lazy evaluation" by using a fn.
+The fn condition: must be pure, must accept no arguments.
+While updating state: simple or based on current state
+
+# useRef
+
+an object with a mutable '.current' property that is persisted across renders.
+2 use cases:
+*Creating a variable (persist data) that stays same btw renders
+*Selecting and storing DOM elements✔
+
+# Refs are for data that is NOT rendered. usually appears in event handlers or effects, not in JSX (use state instead). ALSO DO NOT READ/WRITE .current in render logic.
+
+# STATE VS REFS:
+
+state updates across re-renders, refs do not.
+state are immutable, refs are mutable.
+state updates are asynchronous, refs are synchronous
+
+#167
+
+# Custom Hooks:
+
+We can reuse 2 things in React. Ui (using component) or Logic (does logic contain hooks ? regular fn : custom hook).
+
+Custom hook allows us to:
+Reuse non-visual logic in multiple component
+One custom hook should have one purpose (to make it reusable)
+Rules of hooks still apply
+
+Unlike components (only recieves props and returns JSX), custom hooks allow us to pass or return any relevant data.
+
+# The difference btw custom hooks and regular fns is that custom hooks uses one or more hooks
+
+The name of a custom hook need to begin with "use" else react willl see it as a regular fn
+Not related but its good to know that fn declarations are hoisted, i.e can be used before declaration.
+
+# Class components:
+
+Works in a bit different way with more boiler code.
+
+# NB:
+
+functions when outside the render method, they loose thier binding to the this keyword of the class instance so we need to manually bind them in the constructor
+We modify our state by using a setState() method
+Always reduce the render logic inside the render method to the bearest minimum.
+We can remove boiler code with the class field features (means declaring variables outside of the constructor instead)
+
+We can use arrow fns to avoid having to manually bind the fns to the this keyword of the class instance. bcos arrow fns dont have thier own this keyword an djust takes from its surrounding.
+
+# Functional Components vs Class components:
+
+Class components take the OOP approach and has explicit lifecycle methods that make the lifecycle easier to flow with, fn components usually handles life cycl ish using the useeffect hook.
+HOOKS ARE THE BIG DIFFERENCE.
+fn component uses useState, class uses this.setState()...
+
+# Life cycle methods:
+
+3 => mounting - componentDidMount, re-rendering - componentDidUpdate, unmounting - componentWillUnmount.
+
+SECTION 3 || ADVANCED REACT
+
+# useReducer hook:
+
+A more advanced way of managing state
+Important to understand Redux
+Properties: the state, reducer fn(state, action), dispatch.
+
+We can pass anything in the dispatch method but its a nice convention to pass an object with type and payload keys with thier values.
+
+It is common to use a switch inside of a reducer fn
+
+#149
+
+Why use useReducer?
+useState is not enough in certain situations, when componenets have a lot of state variables and state updates.when multiple state updates need to update at the same time.
+
+using state with useReducer:
+An alternative way of setting state, ideal for complex state and related pieces of state.
+
+# useReducer vs useState:
+
+useState is good for single independent pieces of state
+logic is spread all over one or multiple components
+
+useReducer is for multiple related pieces of state
+logic is in one central place, the reducer
+declarative state component
+
+Install eslint vite-plugin-eslint eslint-config-react-app as dev dependencies and create an .eslintrc.json file to use eslint in react
+
+# Styling in React
+
+CSS modules are a good use cos global css files are a nightmare cos of nonspecifity in large react apps.
+
+we use the global psuedo selector when we have classes provided by a package manager or library to make the style we apply to that class generic across css modules and so that it works well with the class provided by the library e.g leaflet, react-router navLink.
+
+CSS-in-JS is also a good option (e.g Tailwind)
+Another option is UI libraries like MUI, Chakra, Mantine
+
+# Routing
+
+We use it to match different URLs to different UI views (components) - React Router
+Routing is used in SPAs.
+The Page is never reloaded!
+
+NavLink makes it easy to style a selected nav list by adding an active class on the selected one.
+
+Nested routing is when an element (in a part of a component) has a link that leads to a route that changes what appears in a part of the view.
+
+Outlet is used to display the component of a nested route.
+Index is used to set a default route.
+
+In the worldwise app, We manage active tab using routing, a different approach to using the useState hook.
+
+#213, 10:00
+
+# URL for state management in routing: (Dynamic Routes with URL Parameters)
+
+the url is a good place to store UI state and an alternative to useState in some situations. Example:open/closed panels, currently selected list item, list sorting order, applied list filters.
+
+Benefits:
+easy way to store state in a global place
+good way to pass data from one page to another
+makes it easy to bookmark and share the page with the exact UI state it had at that time
+
+We use params and query string to store data in the url.
+
+#216 4:50
+We use useParams from react-router-dom to access the params from the URL and useSearchParams for the query/ies.
+
+we use the name of the query to get the data assigned to it from the url
+
+# Programmatic navigation with useNavigate:
+
+We use useNavigate to move to any route without having to use a link
+We also use the useNavigate to move a number of steps back/forward on our page. like navigate(-1) (imperative),
+
+Tip: when you use a stroke before your route, it automatically adds the root route, if not, it continues it from the current route
+
+React provides us with a Navigate component that we use to redirect our urls. <Navigate/> (declarative)
+We should add the replace attr in this component cos the url redirected to replaces the old url in the history stack.
+
+# Context API:
+
+allows to passdata through the app without manually passing props by allowing to use global state in the entire app.
+We have a Provider, value, consumers.
+
+STEPS:
+
+1. create context,
+2. provide value to components by wrapping them in the context provider. (NB: only components wrapped in the provider can use the context data)
+3. access needed data from the context
+
+Tip: Every function or parameter that updates the API or is used generally should live in the contextAPI.
+
+ContextAPI + useReducer is a great combo you should get comfortable with. 👩‍🏫
+
+#225
+In the atomic blog, we created hooks for the each of the data we are getting from the contextAPI, to avoid unnecesarry repetition.
+
+Nice convention to use the contextAPI:
+create a file for the contextAPI,
+create a context,
+write a function that contains all the data needed, return the context provider that takes the needed value and wraps around the children prop.
+write a custom hook that returns the data so we dont have to repeat using the context hook in our components
+export the function and the custom hook, then use them in the components needed by wrapping the components that need the data inisde the function (which acts as a component) exported from the context file.
+
+# Advanced State management:
+
+Types of state:
+State Accessibility: Local State vs Global State.
+
+State Domain: Remote state vs UI state.
+
+Remote:
+all application data loaded from a remote server (API).
+Usually async
+Needs re-fetching + updating
+
+UI state:
+is all other state 😅
+usually sync and stored in the app
+
+(See screenshot for State Placement Options)
+
+#234 16:00
+
+How authentication works in Applications:
+We get the user email and password from a form and check their credentials against an API, if correct, we redirect them to our main app.
+Upon logging in, We also store the user details in our app and a state to monitor whether he's logged in or not, so we can protect our app from unauthorized access.
+
+#239 08:00
+For the third step of authentication, create a component that displays the app as children if the user is authrnticated or navigates to home otherwise
