@@ -520,4 +520,18 @@ We get the user email and password from a form and check their credentials again
 Upon logging in, We also store the user details in our app and a state to monitor whether he's logged in or not, so we can protect our app from unauthorized access.
 
 #239 08:00
-For the third step of authentication, create a component that displays the app as children if the user is authrnticated or navigates to home otherwise
+For the third step of authentication, create a component that displays the app as children if the user is authenticated or navigates to home otherwise.
+
+# Performance Optimization:
+
+1. Prevent wasted renders: memo, useMemo, useCallback, passing elements as children
+2. Improve app speed/ responsiveness: useMemo, useCallback, useTransition
+3. Reduce bundle size: use fewer 3rd party libraries, code splitting, lazy loading
+
+wasted render is a render that doesn't produce any change in the DOM.
+
+See screenshot on when component re-renders and wasted renders
+
+A solution to wasted re-render is to make components that do not depend on its parent state as children.
+
+# Memoization:
