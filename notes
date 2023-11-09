@@ -258,7 +258,7 @@ Libraries is like using the "separate ingredients" approach, choosing everything
 
 Routing (for SPAs) => Raect router
 HTTP requests => javascript fetch, axios
-Remote state management => React Query
+Remote state management => React Query, React router(doesnt persist state but also useful)
 Global state management => Context API, Redux
 Styling => CSS modules, styled components, tailwindcss
 Form managment => React Hook Form, Formik
@@ -535,3 +535,278 @@ See screenshot on when component re-renders and wasted renders
 A solution to wasted re-render is to make components that do not depend on its parent state as children.
 
 # Memoization:
+
+is an optimization technique that executes a pure function once and saves the result in memory.
+if we try to execute the fn again with the same arg. as before, the previously saved result will be returned, without executing the fn again.
+
+We use this technique to optimize our react app. we memoize components with memo, objects with useMemo and fns with useCallback.
+
+NB: react guarantees that state data is stable so we dont need to bother bout them when implementing memoization
+
+Another optimization technique is to place fns that are not reactive outside of the componenet if possible
+
+memo fn: is used to $create a component$ that will not re-render when its parent re-renders, as long as the props stay the same between renders. It only affects props!.
+
+Only use in large apps that have frequent re-renders or when the props in your child component are not changing so that even if the parent re-renders, the child isnt re-rendered too since its props are not changing.
+
+If we pass an object/fn as props, the memo fn doesnt work well cos every object is unique even if it has the same value, so the object is seen as a new props on every render so the memo simply doesnt work. the solution is to also memoize the object/fn by using useMemo (for any value to be preserved) or useCallback (for fns).
+
+3 big use cases of useMemo & useCallback:
+
+1. Memoizing props to prevent wasted renders (together with memo)
+2. Memoizing values to prevent expensive re-calculations on every render
+3. Memoizing values that are used in dependency array of another hook ✔
+
+the dependency array of useMemo contains variables that would make the function/object/variable to be re-calculated
+
+useCallback is used to memoize a fn, useMemo is used to memoize a value, like an object or a computed value
+
+# Only optimize context if these 3 are true:
+
+State in context needs to change all the time
+Context have many consumers
+if the app is slow
+
+Tips for optimization:
+Use the children prop to pass children of a component, so they dont always re-render when the parent state that they do not consume changes, an alternative is to memoize the children component if directly added to the parent
+
+Its a good practise to craete one context per data, cos when one value of the context changes, the whole context is re-rendered and every component consuming it is re-rendered too
+
+Bundle and Code splitting:
+When we build our project, its built all at once, the bigger the project, the more time it takes.
+We can optimize the build by implementing lazyloading that builds the project in chunks, depending on how each page is called/needed.
+
+See how we implemented lazyloading in the worldwise App.
+(After putting our import inside the lazy method, we then use the suspense API provided by react to implement an action(spinner) pending the time our (build) page loads)
+
+useEffect dependency array rules: check screenshot
+remove unnecessary dependencies: check screenshot
+
+when not to use an effect: check screenshot
+
+we can use useEffect when we need to update a state that depends on a lot of other states, the downside is that useEffect triggers 2 renders instead of one, thats bcos useEffect runs after a page has been rendered...
+
+NB: Be mindful of whatever you put inside a useEffect
+
+Remember closures?
+Closure is when a fn captures all the variables from its lexical scope, from where it was defined at the point that the fn was created. i.e the fn always has access to all the variables from the place where it was defined.
+
+In react, hooks heavily rely on the concept of closures and this is specially true for useEffect
+
+Any fn that was created at the initial render and never again (is a stale closure cos its not updated), can be referred to as a snapshot and gets access to its initial state and variables. So
+
+# REDUX
+
+3rd party library to manage global state
+All global state is stored in ine globally accessible store and updated using actions
+
+2 versions: 1. Classic redux, 2. Modern Redux Toolkit
+
+We learn 1 first, then the second
+
+Redux is perfect to manage a lot of non remote global state.
+For remote global state, use something like React Query.
+
+See use case of redux in screenshot.
+
+# redux is Similar to useReducer except that it uses a store as a source of truth and uses an action creator fn to automate writing action which is helpful to keep all possible actions in one central place (A convention, not a must)
+
+Event handler => Action creator fn => dispatch => store => next state => re-render component.
+The goal is to make update logic spearate from the rest of the application
+
+Action creators are not mandatory nor a part of redux but just a nice approach
+use in redux and it involves creating fns to manipulate reducer data, rather than always writing the dispatch with the objects, we just call the fn when and where needed.
+
+Remember to always keep business logic inside the reducer fn except it is a side effect then maybe put inside the dipatch fn.
+
+#262
+Steps to use redux:
+Prepare reducer fn,
+initialize store,
+create action creators/providers
+dispatch action creators to manipulate reducer state data
+
+# NB's:
+
+- create a reducer fn for each separate data group.
+- We dont dispatch actions directly to the reducer but we dispatch actions to the store
+- If we have more than one reducers, then we combine the reducers in a rootReducer using a redux method
+- Use 'Features' to arrange files structure, then create a slice for each feature. each slice contains the initialState, reducer and action creators of the data.
+- Then all slices are imported and saved to the store,
+- finally this store is exported and used to dispatch actions throughout our app.
+- We can only use redux in react by using the react-redux package
+
+Using redux in react app is similar to the contextAPI approach, by wrapping components in a provider component provided by react-redux.
+We use the dispatch method provided by react-redux to modify data in our store and the action providers to dispatch the actions
+
+#269
+Before react-redux's modern hooks, we connect our redux to our react application using the connectAPI.
+To use the connectAPI, we create a fn to map the state we take from redux and map it to the props of the component where we want to use the redux data
+
+# Redux Middleware (Thunks):
+
+We cannot make async fns inside our reducer fns cos reducers need to be pure fns, so we can use redux middlewares for this
+
+Redux Middleware is run after a dispatch but before the action is executed in the reducer, this makes the perfect time to add impure fns like async fns, API calls, timers, logging, also side effects. etc.
+
+Steps to use middleware:
+Install package => Apply middleware to store => Use middleware in our action creators fn.
+
+To use thunk in action creator: return a fn that contains the logic and dispatches an action.
+
+# Modern way of writing redux. (Redux Toolkit):
+
+Modern and preferred way of writing redux.
+Makes us use best practices.
+
+Advantages:
+
+1. We can write code that mutates state inside reducers (will be converted to immutable logic behind the scene).
+2. Action creators are automatically created
+3. Automatic setup of thunk middleware and Devtools
+
+package: @reduxjs/toolkit
+
+#275 13:00
+
+redux-toolkit composes action names from the name of the slice and the action name
+
+in redux-toolkit, By default the action is set to take only one parameter, we can configure it to our taste using the prepare method in the action fn
+
+In redux-toolkit, the first parameter in an action is the state, the second is what we pass into the action fn when we dispatch it, if we pass more than one value, we need to use the prepare method to modify our (payload) data.
+
+# Using thunks in redux-toolkit:
+
+Thunk is a middleware that sits between the dispatching and the reducer itself, it is used to do somthing to the dispatch action before updating the store.
+
+A good case to use thunks is when we have an async fn we need to use in our redux and as we know, redux is synchronous by nature so we need to use thunk to manipulate this.
+
+Its way easier to use the action provider approach we learnt before to implement thunks than using the async method provided by redux-toolkit.
+
+# ContextAPI + useReducer vs Redux:
+
+ContextAPI + useReducer: use in small apps
+Easy to setup
+additional state 'slide' requires new context setup from scratch
+
+Redux: use in large apps
+3rd party
+takes up more bundle size
+
+(See screenshot for more details)
+
+Jonas Useful React Resorces:
+https://www.udemy.com/course/the-ultimate-react-course/learn/lecture/37352508#reviews
+
+Tips: (see eslint packages and file in fluffy-snacks project)
+Install eslint configs in your react project.
+Configure "eslint" in your project.
+
+# APPLICATION PLANNING:
+
+Big Project: (rough sketch)
+
+1. Gather app requirement and features
+2. Divide app into pages:
+   think bout overall and page-level UI
+   Break into components
+   design and build a static version(no state yet)
+
+3. Divide app into feature categories:
+   think bout state management + data flow
+4. Decide what libraries to use (tech decisions)
+
+Get the Project Requirements from the business. (see screenshot for fluffy-snacks own).
+Derive feature category from project requirement, then you can derive pages and state slices from features. (see screenshot)
+
+# Professional File Structure: (Feature-based structure is best for big projects)
+
+features for each feature with their state slice,
+services: reusable code to interact with an API,
+ui: reusable components like btns,
+utils: pure reusable helper fns.
+
+We can use the react-router in a different way: by using the "createBrowserRouter" (imperative way) instead of BrowserRouter.
+
+This method: createBrowserRouter, is necessary to enable data-fetching/data-loading in react-router. how? => Each route can define a "loader" function to provide data to the route element before it renders
+
+Its a nice convention to write the loader fn inside the component that would use it but we can put it anywhere. After writing the loader fn and config it in the browserRouter, we use the useLoaderData hook to access it.
+
+The approach that the react-router uses for data-fetching is called: render-as-you-fetch.
+
+We can get the loading state of our pages using the useNavigation hook which tracks a genenric loading state for our app, for any of our pages at all.
+
+# Loading in react router:
+
+we use the loader to simulate a loading condition for every data that is needed by the component, we fetch/call the data inisde the loader fn for the component and the data is collected as soon as the component is loaded.
+
+PS: we get a generic loading state (from react-router useNavigation hook) for our components that we can use to make a nice loader when any component is loading.
+
+# Handling errors in react router:
+
+Just like the loading state, we can handle any error that occurs at any point of our app, cos our errors from the children component bubbles up to their parent, so we can handle it there by accessing the error message using a react-router hook. We can also handle the error in the component instead.
+
+# Using useParams hook in react router loader fn:
+
+cos we can only use hooks inside of components, we cannot use hooks inisde of ordinary functions, react router provides the params value as one of the data accessible by the loader fn as props.
+
+# Writing data with react router "actions" (& react router forms)
+
+Like the loader are used to read data, actions are used to write data. i.e to manage remote server state. the implementation is similar as using loader to get data. We create an action fn that recieves our formInputs and is ran when we submit our form.
+
+NB: react router uses the nearest route when submitting the form
+Also note that we did not need things like setting states for our form inputs or even an onClick fn to submit the form and so on...
+
+To redirect to a route from the action fn, react-router provides a redirect method cos as we know, we cannot use an hook inside of an ordinary function
+
+<!-- 06:53 -->
+
+# Quick tailwind tips:
+
+In responsiveness, a breakpoint applied moves from the set breakpoint upward, sm moves from 640px upward and a default styling would be from 0px upward or to 640px if an sm breakpoint is set on the same style.
+
+#304
+We can use the @apply to write styles that we can reuse across our app but this should only be done when its a necessity cos it nullfies the essence of tailiwind so instead we should use reusable components in this cases.
+
+Tailwind allows us to use its defined stylings inside the @apply method in our css file.
+
+useful resource => https://dev.to/afif/i-made-100-css-loaders-for-your-next-project-4eje
+
+In the tailwind config, anything we place inside the theme overides tailwind default values, so we should put them in the extend object to actually make it as an extension of what we have.
+
+We discussed a lil bit bout tailwind configuration and using the extend property. to add/set more styles.
+
+Some tailwind classes:
+space-x: to add space between the children of a parent element,
+divide-y: to add lines between the children of a parent element,
+
+# Recap to using Redux:
+
+create a store,
+create slices connected to that store,
+create and export your actions from the slice
+
+connect redux to your react app using the Provider component to wrap your entire app and pass the store as a prop in it, this component is gotten from the react-redux package
+
+To use our actions in the components we need them in, we need to dispatch them using the useDispatch hook.
+
+#315
+Its a nice practice convention to abstract and place useSelector's callback fn in its slice file and export the callback fn so we have one central place for deriving those data.
+
+Its also a nice convention to start the name of these callback fns with "get..."
+
+We can reuse actions in other actions by calling them from the caseReducers method. (See cartSlice.ts, line 41)
+
+To perform actions like clearing the cart upon submission of a form, we need an hakc since we cant just use hooks in pure fns. so what we do is import the whole store and use the dispatch hook to call the clearCart action.
+
+# modern approach to use thunk in redux:
+
+- create a fn with the createAsyncThunk hook, first parameter is action type name, second is the thunk fn which is usually async (reason why we use thunk in the first place anyway).
+- after writing the fn, (note that the return data is the payload of the fulfilled state of the thunk fn)
+- add fns to the "extraReducer" method in the userSlice config, these fns (usually 3) would handle the 3 case scenarios: [pending, fulfllled, failed] of the intended thunk fn.
+
+# Fetching data without navigation: useFetcher
+
+Normally react-router gives us the feature to fetch data automatically when we load a page as we have seen, but if we want to load any data manually on any component, we can use "useFetcher"
+
+(is used to fetch a data to a component without autoloading the page as we've been doing)
