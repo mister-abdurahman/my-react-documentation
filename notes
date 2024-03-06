@@ -250,7 +250,7 @@ Not so important tip: You can attach 'capture' if you need to handle an event du
 
 # Libraries vs Framework & the react ecosystem:
 
-Frameowork is like an "all-in-one" kit for a sushi meal, i.e it includes everything you need to build your apps e.g: angular, svelte.
+Framework is like an "all-in-one" kit for a sushi meal, i.e it includes everything you need to build your apps e.g: angular, svelte.
 
 Libraries is like using the "separate ingredients" approach, choosing everything you want to use yourself. e.g REACT. allows the use of external libraries. This means FREEDOM 🚀
 
@@ -416,13 +416,19 @@ useReducer is for multiple related pieces of state
 logic is in one central place, the reducer
 declarative state component
 
-Install eslint vite-plugin-eslint eslint-config-react-app as dev dependencies and create an .eslintrc.json file to use eslint in react
+# Steps to use eslint in project
+
+Install eslint, vite-plugin-eslint, and eslint-config-react-app as dev dependencies,
+create an .eslintrc.json file to use eslint in react
+import and include eslint in vite config file
 
 # Styling in React
 
 CSS modules are a good use cos global css files are a nightmare cos of nonspecifity in large react apps.
 
 we use the global psuedo selector when we have classes provided by a package manager or library to make the style we apply to that class generic across css modules and so that it works well with the class provided by the library e.g leaflet, react-router navLink.
+
+(i think i used css modules in world wise app, not sure)
 
 CSS-in-JS is also a good option (e.g Tailwind)
 Another option is UI libraries like MUI, Chakra, Mantine
@@ -512,6 +518,8 @@ is all other state 😅
 usually sync and stored in the app
 
 (See screenshot for State Placement Options)
+
+NB: I'm using react-query for wild-oasis and we used react-toolkit-query for rapha. Both remote states are cool though but RTK is more complex to setup but comes with the benefit of react-redux for global local state on the side.
 
 #234 16:00
 
@@ -726,7 +734,7 @@ services: reusable code to interact with an API,
 ui: reusable components like btns,
 utils: pure reusable helper fns.
 
-We can use the react-router in a different way: by using the "createBrowserRouter" (imperative way) instead of BrowserRouter.
+We can use the react-router in a different way: by using the "createBrowserRouter" (imperative way - better) instead of BrowserRouter.
 
 This method: createBrowserRouter, is necessary to enable data-fetching/data-loading in react-router. how? => Each route can define a "loader" function to provide data to the route element before it renders
 
@@ -795,7 +803,7 @@ Its a nice practice convention to abstract and place useSelector's callback fn i
 
 Its also a nice convention to start the name of these callback fns with "get..."
 
-We can reuse actions in other actions by calling them from the caseReducers method. (See cartSlice.ts, line 41)
+We can reuse actions in other actions by calling them from the caseReducers method. (See fast-pizza app, cartSlice.ts, line 41)
 
 To perform actions like clearing the cart upon submission of a form, we need an hakc since we cant just use hooks in pure fns. so what we do is import the whole store and use the dispatch hook to call the clearCart action.
 
@@ -810,3 +818,126 @@ To perform actions like clearing the cart upon submission of a form, we need an 
 Normally react-router gives us the feature to fetch data automatically when we load a page as we have seen, but if we want to load any data manually on any component, we can use "useFetcher"
 
 (is used to fetch a data to a component without autoloading the page as we've been doing)
+
+this method: fetcher.load('/menu') fetches the data that loads when the "menu" route is normally ran.
+
+# Updating data without navigation: useFetcher
+
+We also use the useFetcher here, works like a normal react-router action fn, except that we need to wrap the div in a special form "fetcher.Form"
+
+Note that even if the form we want to update is a child component of the component we are connecting the action fn to, it still works perfectly fine.
+
+Revalidation is a cool feature that helps us. it is how react knows that something has changed when we update our data with an api like a patch or put. React notes this change and reloads the page to update itself with the new data.
+
+# NB:
+
+"PUT" method takes in a whole new data to replace the old one, "PATCH" takes only a part of the data to be updated
+
+# Styled Components:
+
+Uses template literals to create styles for a component so we can reuse that componnet with the set style.
+
+To use a global style, it should be a sibling to every component that should take its styling and it doesnt take any child
+
+Styled components can take props to set styles for differeent types of a component. We can also use the "as" props to set the element type of a component.
+
+# Supabase: backend as a service (uses postgres db, doesnt matter though)
+
+Includes user auth and file storage
+Modeling state: we derive/set our states based on the features/page level. (see screenshot, couldnt take shot. video no 339, min - 2:55)
+
+RLS:
+Row Level Security
+
+We need to adjust our RLS policy so we can recieve the response data from our APIs.
+
+# Connecting Supabase with React app:
+
+Install supbase-api library - see supabase doc.
+
+Setup storage buckets to store large files mostly like images and so on.
+
+# React Query: (jonas's fav react library 😍)
+
+Remote state management
+takes over data fetching and management
+
+some good news bout RQ:
+-all data fetched is stored in a cache.
+-automatic loading & error states.
+-automatic refetching to keep state synched (react query syncs db data by refetching the data after a certain timeout or after we leave the browser window and come back to it). (we can set a staletime)
+
+- Prefetching data (like incase of pagination)
+- Offline support
+
+Its nice if you can use react query devtools to monitor states in the cache
+
+useQuery to fetch
+useMutation to edit/delete
+
+NB: the mutation fn can only accept one argument !, so you might want to pass in an object instead
+
+# React hot toast - for notifications
+
+# React hook form - for forms
+
+RHF is very effective for handling form errors and validation.
+
+We also learnt to upload image urls to the supabase bucket storage
+
+# Advanced React patterns - for senior react devs 😎
+
+Render props = to control component render by passing the data and a fn that tells the component what to render (render needs to always be a fn)
+
+# Higher order components - cool pattern
+
+is when we incorporate a component into another component to create an enhanced component. its a convention to name your HOC with the prefix "with-"
+
+Compound components = for self contained components that wants to manage their own state, usually combines small chunks of components to form a super component (this approach avoids prop explosion (too many props) and makes our elements flexible to use).
+
+This approaches uses context(API), steps are:
+
+1. Create a context
+2. Create parent component
+3. Create child components to help implementing common task
+4. Add child component as properties to parent component
+
+# React Portal:
+
+A portal only changes the physical placement of the DOM node. The component is still at the same place on the component tree, only its position on the dom tree is changed. So every prop passed to it is still recieved correctly.
+
+React Portal is useful to avoid conflict with the css property overflow when we use the component in several places.
+Making sure that our component is never cut off by an overflow property.
+
+React portal is also useful if our component is floating or appearing on top of our view or other components.
+
+We want the modal to manage all its state internally so we use a compound component for that.
+
+# Clone element:
+
+allows us to craete a new React element using another element as a starting point,
+useful; for when we want to add an event listener on a children prop (see wild-oasis, modal-v1.jsx).
+
+# NB: remember bubbling and captuiring phase in javascript?, read up.!
+
+adding "true" as a 3rd parameter in an event listener means that the event should run in event capturing phase rather than the default bubbling phase (moving up). This is sometimes useful like in our case in wild oasis. (Window component in Modal-v1).
+
+# Client Side filtering:
+
+We implemented sorting, filtering and pagination in wild oasis.
+
+# Pre-Fetching with React Query:
+
+fetching data that we might need before its requested for, can be useful when we implement server side pagination for better UX.
+
+About using folder structure rules:
+Dont fetch any data in pages, instead fetch them in your features folder and then render them in your page component
+
+In a useMutation, the onSuccess option gets access to the result from the mutationFn.
+Invalidate your queries on a successfull mutation fn
+
+Note that we can also use the onSuccess/error as an option parameter on the mutate fn.
+
+Allow only authenticated users to login, and only authorized users to access certain routes.
+
+We use the remote api to check if a user is currently logged in to the systtem bcos using the local one might not cater for if the user tries accessing the route at a later time. (we can make tokens expire after a period of time to trigger a re-login)
