@@ -940,4 +940,15 @@ Note that we can also use the onSuccess/error as an option parameter on the muta
 
 Allow only authenticated users to login, and only authorized users to access certain routes.
 
-We use the remote api to check if a user is currently logged in to the systtem bcos using the local one might not cater for if the user tries accessing the route at a later time. (we can make tokens expire after a period of time to trigger a re-login)
+# Authentication & Authorization (access to route) Process:
+
+Routes are protected, then...
+We first check if session exists in localStorage, then if it does exist, we check and fetch the user details to login and create a session for him.
+
+We can manually set some data into react query cache, to skip refetching in some instances like logging in an auth user. see useLogin.ts file (wild oasis)
+
+Its a good practice to remove all query cache when logging out
+
+# Look at "SignupForm" in wild-oasis for react-hook-form validation options.
+
+keywords: register, required, pattern, minLength.
