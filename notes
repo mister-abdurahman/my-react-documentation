@@ -248,6 +248,8 @@ Note that in event handling, its the DOM tree that matters not the component tre
 For events, React uses synthetic events so that events work same across all browsers, it is very similar to the native DOM event object and has all the important methods.
 Not so important tip: You can attach 'capture' if you need to handle an event during the capture phase. e.g onClickCapture.
 
+capture phase vs bubbling phase in event propagation???
+
 # Libraries vs Framework & the react ecosystem:
 
 Framework is like an "all-in-one" kit for a sushi meal, i.e it includes everything you need to build your apps e.g: angular, svelte.
@@ -952,3 +954,76 @@ Its a good practice to remove all query cache when logging out
 # Look at "SignupForm" in wild-oasis for react-hook-form validation options.
 
 keywords: register, required, pattern, minLength.
+
+Implement authentication on front and backend.
+
+Small Note on React Query:
+We use invalidateQuery to set a cache to stale so we can refetch it, this is done when we modify a data we have previously fetched before to update it withthe remote data.
+
+We also use setQueryData to manually set cache data to a specific data, this is useful when maybe our cache doesnt get updated automatically
+
+# Error Boundaries:
+
+are like trycatch but for react rendering, the default error boundary is quite hard and still uses the class component approach, so people usually a library called react-error-boundary,
+
+set it up by using it to wrap your app in main.tsx
+Note that error boundaries only catches error when react is rendering, so error from an effect, or event handler or async fns.
+
+# Deployment:
+
+build your projects before deploying to fix issues first
+
+# Explore:
+
+Typescript, Framer motion, material UI
+
+# Server Side Rendering (NextJs):
+
+CSR is bundling code into one and then downloading on the client to render it
+SSR is rendering the html on the server, then sending it to the browser.
+
+CSR Cons:
+the main problem of client side rendering (CSR) is slower initial page load bcos the js bundle needs to be completely downloaded before app starts running
+Data is fetched after components mount
+SEO can be problematic cos google might initially see a blank page
+CSR Pros:
+Highly interactive (cos all content has already been loaded except data)
+
+SSR Cons:
+Less interactive cos new requests needs to be made for dynamic changes and might require full page reload
+SSR Pros:
+Faster initial load cos only little js needs to load
+Data is fetched before html is rendered ...
+Good for SEO cos html is already rendered on the server and is just sent to client on request
+
+CSR is perfect for building highly interactive web apps, SSR is good for content-driven websites or apps that require SEO like E-commerce, blogs, news...
+
+# 2 types of SSR:
+
+Static Site Generation: html is generated at build time and is sent to client (once)
+Dynamic Site Generation: html is generated eah time server recieves a new request (some call only this SSR)
+
+# Hydration:
+
+adds back interactivity and event handlers that were lost when html was server-side rendered (solves the problem of rendering react on server with only html)
+
+react builds the component tree on client and compares with actual SSReactDOM DOM, must be same so react can adopt
+
+when existing server rendered DOM is the same as the DOM that react (thinks we should have) would output on the client and if there are differences between the 2 DOMs, then the page content would change after hydration finishes and this is bad for UX and causes an hydration error
+
+Some causes of hydration errors:
+incorrect nesting of HTML elements (like putting div inside p), rendering diff data on server and on client, using APIs or variables that exist only in the browser, incorrect use of side effects, and so on
+
+<!-- ///////////////////////////////////////////////////// -->
+
+# Move to Node Documentation:
+
+# OAuth
+
+means open auth,
+passport strategies are the different ways of using different 3rd party socials for auth in passport,
+access google keys from developer console
+
+auth redirect url is the url that is ran after google authenticates user permission and user details is given to our server. e.g: domain/auth/google/redirect.
+
+For Oauth, continue from #11 netninja OAuth playlist.
