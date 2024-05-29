@@ -1014,6 +1014,19 @@ when existing server rendered DOM is the same as the DOM that react (thinks we s
 Some causes of hydration errors:
 incorrect nesting of HTML elements (like putting div inside p), rendering diff data on server and on client, using APIs or variables that exist only in the browser, incorrect use of side effects, and so on
 
+# NextJs:
+
+is opinionated.
+allows us to use cutting edge react features such as suspense, server components, server actions, steaming...
+
+Key Ingredients:
+SSR (static and dynamic)
+file-based routing
+data fetching and mutation on the server
+optimizations (images, seo, fonts...)
+
+NextJs has 2 flavours of router: App (modern) and Pages (legacy)
+
 <!-- ///////////////////////////////////////////////////// -->
 
 # Move to Node Documentation:
