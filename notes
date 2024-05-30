@@ -1027,6 +1027,14 @@ optimizations (images, seo, fonts...)
 
 NextJs has 2 flavours of router: App (modern) and Pages (legacy)
 
+# Routes:
+
+is folder structure file based.
+
+# Layout:
+
+the layout file wraps the entire application and is the root
+
 <!-- ///////////////////////////////////////////////////// -->
 
 # Move to Node Documentation:
