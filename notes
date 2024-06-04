@@ -1007,6 +1007,8 @@ Dynamic Site Generation: html is generated eah time server recieves a new reques
 
 adds back interactivity and event handlers that were lost when html was server-side rendered (solves the problem of rendering react on server with only html)
 
+We can see the effect of hydration when you just load a page, the html displays but because the js is stil downloading, the interactivity doesnt work (like clicking a btn) until the js is downloaded.
+
 react builds the component tree on client and compares with actual SSReactDOM DOM, must be same so react can adopt
 
 when existing server rendered DOM is the same as the DOM that react (thinks we should have) would output on the client and if there are differences between the 2 DOMs, then the page content would change after hydration finishes and this is bad for UX and causes an hydration error
@@ -1034,6 +1036,206 @@ is folder structure file based.
 # Layout:
 
 the layout file wraps the entire application and is the root
+
+# NextJs is all about conventions:
+
+Next is all about conventions: folders create route, page.js for each folder route, layout is entry of project, metadata is added as an object, general loading file in root works for all loadign state, components folder for all reusabel components, name an image with "icon" and place it directly in the app folder
+
+# React Server Components 🔥:
+
+We have 2 approaches to building apps as discussed before:
+
+100% client side f(state) - 100% server side f(data) e.g php
+while csr(client side react) is interactive but needs huge js mosttimes, php needed to fetch zero js but not interactive.
+
+So to create the best of both worlds => RSC.
+
+Server Components are components that are only rendered on the server (never on client),
+they are not part of the js bundle and they are a f(data) that powers the application interacting directly with the data and not state.
+
+We cannot use any react hook on Server components
+
+We can now build our own backend in react !!
+
+NB: if we start a new plain react project, we will not get access to server components by default cos we need a server for this, thats where frameworks like Next & Remix come in.
+
+So in this Next Architecture, Server components are the new default components. \*
+
+[NB:]
+
+- if a component is Uninteractive and/or needs to be fetched from database use RSC, if interactive use RCC.
+- RCC components usually appear at the end of the dom tree
+- RSC children components dont need us to specify "use client" cos they are already in the server-client boundary
+- Pages should be Server Components
+
+# React Server-client Boundary:
+
+they are what marks the split point between code that run on the server and the one that runs on the client.
+
+# Diff btw RSC and RCC: (see screenshots)
+
+Props:
+RSC => yes(but must be serializable, no fns/classes)
+RCC=> yes
+Data fetching: RSC is preferred (we can use async/await) but RCC can also be used
+Can Import:
+RSC => can import both RSCs and RCCs
+RCC => can only import RSCs (cannot go out of the server-client boundary)
+Can Render: (for one component to call another)
+RSC => can render both
+RCC => can render only RSC passed as props
+Re-render:
+RSC => on url change (navigation)
+RCC => on state change
+
+[NB:]
+
+- Server and Client components are essentially connected by Props.
+- When we want to use a data on the client.c but want to fetch from server.c, we can pass it as props to the client.c
+- sneak-peek info: both server and client components are rendered on the server in the initial render and displays but details on how this happens in a bit...(details btw RSC & SSR)
+
+# Loader file:
+
+this loader works for all routes
+
+the loader works as next streams the data fetched to display it and this streaming needs javascript to be enabled in the browser for it to work so if you have javascript disabled, using this loading.js file wouldnt work.
+
+We can also activate this loading.js for certain components using suspense cos sometimes the data fetch is done in a page component anf by default the page where loading occurs is replaced by the spinner and we might want it to show on just the part involving the data fetch.
+
+# How RSC works behind the scene: see screenshot
+
+When we have a component tree that has a combination of SC and CC, the SCs are rendered first with holes like placeholders of the CCs containing the props (serialized) that they recieve and the url to script with component code needed to render these CCs. This description is called the RSC payload (virtual dom of sc + trees of cc)
+
+[NB:]
+The RSC payload is said to bridge the gap btw SC & RC
+after the explanation of how RSC really works, we can say UI is not f(data, state) but is actually f(data)(state).
+
+# RSC vs SSR: (how do they relate)
+
+SSR: take the component tree, render it as html on server and send to html, then also send react code (js) to make html interactive (hydration).
+
+RSC and SSR are not samething but NextJs combines them to make server rendering work best.
+
+So both SC and CC are initially rendered on the server when SSR is used, and then subsequently SC are rendered on the actual server and CC are rendered on the actual client.
+
+[NB:]
+A misconception that may devs have is that client and server rendering and components as we've been discussing are the traditional server and clients, they are not. They are different environments in the react architecture
+
+When components are run once at build time, thats static site generation.
+
+# Project Organization:
+
+to make a folder private (not be in the route), add the underscore e.g "\_components"
+
+to use tailwind, we need a globals.css file imported in the root of the app (layout.tsx)
+@heroicons/react is a tailwiind icon library
+
+did you get the memo of dynamic advanced title metadata using template and default.
+
+its a nice convention to use lib folder for js files that are not components at all but are still related to our project
+
+# Loading and Optimizing fonts and Images.
+
+font opt. in layout file.
+
+Next Image component optimizes images by:
+serving correct modern file format
+prevents layout shift by forcing required height and width
+lazy loads images when they enter viewport
+
+Using the Image component, there are several ways of using it:
+
+- To use fill, set the width, height and position of parent of the image.
+
+(Statically Imported Image)
+
+- First import file and then set file to src, this method doesnt need us to specify height and width
+
+(Directly imported...)
+
+- We must Specify width and heigth
+- we cannot add properties such as quality, placeholder and so on
+
+# Adding Nested Layout:
+
+each route is referred to as a segment.
+
+To add a nested layout in a particular segment, we create a layout file in the parent folder so that the layout file encapsulates every segment of that parent folder.
+
+[CSS chip-in:]
+when you set a div to grid, it takes all the available vertical space
+
+# Data Streaming, Fetching, ...
+
+NextJs supports dotenv file so we can access our variables without any import
+In the dotenv file, starting a var name with NEXT_PUBLIC would make it public
+
+Apparently, to use images from a remote source, we need to set it up in a config file.
+
+We do fetches on SCs cos we are closer to the data source that way and do not need state or 3rd party libraries to handle fetch and manage data.
+
+We can use specific routes for specific segments, we do so by creating a loading.js file in the folder route we want to use it, lest it uses the global loading.js
+
+Its important to note that having a loading.js file will activate streaming. (and streaming requires js. remember?)
+
+# Suspense:
+
+To make the loading spinner only for a specific part of the page (the part where data is actually fetched), we need a react method - Suspense
+
+2 use case of suspense:
+
+- fetching data (with a supported library e.g ReacyQuery, NextJs)
+- loading code (with react lazy loading)
+
+Suspense makes our loading more declarative
+The Parent component hosting the suspended children components is referred to as the suspense boundary
+
+# Behind the scenes of Suspense: (see screenshot)
+
+In the fiber tree: Suspense uses another built in component "Activity" that sets our spinner as the fallback during a suspense when activity is set to hidden from visible, after the async mode, the activity is set back to visible and content shows. Note that elements are not destroyed in the fiber tree
+
+if the component suspends later, the entire process happens again and the fact that the subtree of a suspense are always in the fiber tree between subsequent suspends is an important fact...
+
+But one exception, the fallback will not be shown if the fn that triggers the suspense is wrapped in a transition using React startTransition fn, this matters cos in NextJs, all page navigations are wrapped inside transitions.
+
+So if a component re-fetches data as a result of a page transition or navigation by the user, the fallback will not be rendered again and this is not usually what we want. But we can fix this by passing a unique key prop
+
+- [How does Suspense actually know that a component is suspending?.]
+  the trick is that the component throws a promise which will then trigger the suspense boundary which then renders the fallback (spinner). This process is a bit tricky and thats why we use libraries like ReactQuery, NextJs...
+
+  So whatever we pass in the callback of the suspense overwrites the set loading.js
+
+  # Dynamic Route segments:
+
+  we create a folder using [] with the params name and inside the segement page, we get access to the params variable in our props.
+
+  # Generating dynamic metadata:
+
+  We use NextJs convention "generateMetadata", to fetch the cabin and get the name, then return info as metadata.
+
+# Error handling:
+
+setting a global error boundary, again convention...
+
+the error file must be a CC.
+
+Just like our loading.js, we can also have error boundary files for each segments
+
+keep in mind that this error boundary only works only in renders, if any error happens in fetching or so, it owuld not be handled in "React error boundary" and does not handle errors that happen in the root layout.
+
+For root layout, we can create a global-error.js file but it will replace the layout.js file and have its own html [#451, 08:20]
+
+We can use the "notFound" method from next to invoke the not-found component. like by calling it inside the catch of our fetch calls.
+
+# Different Types of SSR: Static vs Dynamic Rendering
+
+server side rendering work is split by routes so each routes can be rendered different ways.
+
+- static
+- dynamic (pre-rendered)
+- partial pre-rendering (mixes dynamic & static)
+
+there's a special type of static rendering called incremental static regeneration -> rerendering the page periodically by refetching data
 
 <!-- ///////////////////////////////////////////////////// -->
 
