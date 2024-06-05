@@ -1231,11 +1231,53 @@ We can use the "notFound" method from next to invoke the not-found component. li
 
 server side rendering work is split by routes so each routes can be rendered different ways.
 
-- static
+- static (runs once on build)
 - dynamic (pre-rendered)
 - partial pre-rendering (mixes dynamic & static)
 
-there's a special type of static rendering called incremental static regeneration -> rerendering the page periodically by refetching data
+Static:
+
+- html is generated once at build time
+- useful when data doesnt change and is not personalized
+- static is default rendering strategy in NextJs (even when the component fetches data) (cos static is faster)
+- when deployed to vercel, each static route is hosted on a CDN
+- if all routes in the app are static, app can be hosted as a static site (SSG)
+
+dynamic rendering:
+
+- html is generated at request time (i.e on each new request)
+- useful when date changes frequently and is personalized
+- useful when rendering a route that requires info that depends on the request (e.g params)
+- when deployed to vercel, each dynamic route becomes a serverless function
+
+NextJs switches from static to dynamic when:
+route has a dynamic segment (uses params)
+searchParams are used on the page component
+headers() or cookies() are used in any of the route's server components.
+
+We can also force NextJs to render a route dynamically (see screenshot)
+
+# Import Related Terminologies:
+
+CDN:
+is a network of servers located around the globe that cache and deliver a website's static content (image, html, css, js) from as close as possible to each user.
+
+Serverless computing:
+we can run single fns on a cloud provider (serverless fns). the server is initialized and active only for the duration the serverless fn is running unlike our traditional Node.js app that is always running
+
+The "Edge": (not wwe superstar 😅)
+refers to being "as close as possible", a CDN is part of an edge network but theres also serverless edge computing (computing that doesnt happen on central server btu on a network distributed around the globe, close to the user, [like cdn but running code]).
+
+The above note is relevant bcos we can select certain routes to run on the edge when deployed to vercel.
+
+Incremental Static Regeneration (ISR):
+allows developers to update content of a static page in the background, even after the website has already been built and deployed. this happens by refetching data after a certain interval
+
+# Making dynamic pages static with generateStaticParams:
+
+generateStaticParams is used to let Next know the possible values of a params
+
+if all our pages are static pages, we can do SSG so that we can easily deploy it and also for performance. We can use SSG by setting output to export in the next config and then build
 
 <!-- ///////////////////////////////////////////////////// -->
 
