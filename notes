@@ -1400,7 +1400,11 @@ are all cc dynamically rendered by default ? no, until the conditions that make 
 Link is a declarative way of navigating, useRouter is programmatic way
 We should add a key to our suspense so that when our content for some reasons (like navigation) is suspended, we see that spinner (fallback) for good UX cos if we dont add key it only works on initial render i guess.
 Hope we remeber that navigation causes re-render in server components which births line 1397
-#465 is an important lecture (sharing state btw server and clientf components)
+#465 is an important lecture (sharing state btw server and client components)
+
+# Rendering Server.C in Client.C
+
+pass sc as props to cc,.
 
   <!-- ///////////////////////////////////////////////////// -->
 
