@@ -1279,7 +1279,130 @@ generateStaticParams is used to let Next know the possible values of a params
 
 if all our pages are static pages, we can do SSG so that we can easily deploy it and also for performance. We can use SSG by setting output to export in the next config and then build
 
-<!-- ///////////////////////////////////////////////////// -->
+# Statis Site Generation (SSG):
+
+The ImageAPI only works on dev cos we use a vercel server that does the optimization for us but we need to do the below 👇 for build to run on any server
+
+we need to set {image: {unoptimized: true}} in next config file before build so that Next Image API doent cos issues in static files.
+
+# Partial Pre-Rendering (PPR):
+
+for pages that doesnt need to be fully static nor fully dynamic.
+
+How it works: A static (pre-rendered) shell is rendered with holes of the dynamic parts that are then loaded and filled so we can have a 80% static 20% dynamic page/route.
+
+PPR is currently experimental as at Next 14 and should not be used in production
+
+PPR needs to be turned on in Next as static is default
+
+Dynamic components are placed into suspense boundaries so that Next knows that boundary is a dynamic content and the boundary also ensures that only that part is dynamic
+
+# NextJs Caching:
+
+(see screenshot for revalidation explanation, also at #458 15:00)
+
+storing fetched or computed data in a temporary location for future use.
+NextJs caching is aggresive, everything cachable is cached.
+NextJs provides APIs for cache validation
+
+👎 Caching is always ON by default and some cache cannot even be turned off.
+
+[NB]: caching as illustrated below is seen or happens on production and not on development.
+
+Caching mechanisms:
+
+- Request Memoization
+  is used on the server
+  caches data fetched with similar Get Requests (same url and options and only works when we use native fetch)
+  caching happens only over the life span of a single page
+  So we can fetch it once and then when fetching anywhere else we dont need to refetch
+  Only works in components, not route handlers or server actions
+  (revalidation): N/A
+  (opt-out): Use AbortController - see docs
+
+- Data Cache
+  is used on server
+  data fetched in a route or single fetch request
+  is saved inefinitely even across re-deploys
+  handles data for static pages + ISR when revalidated
+  (revalidation): 2 types
+  time-based and On-demand
+  (opt-out): 4 different approaches - see screenshot or check #458 15:00
+  Note that opting out forces page to become dynamic
+
+- Full Route Cache
+  is used on server
+  data fetched from entire static pages (HTML and RSC payload)
+  only changes when "data cache" is invalidated
+  handles data on static pages
+  (revalidation) relies on data change in "Data cache"
+
+- Route Cache
+  is used on client
+  caches prefetched and visited pages (static and dynamic)
+  SPA-like navigation feel
+  saves dynamic data for 30seconds and static for 5 minutes (throughout one user session) [this is bad cos it causes the possibility of stale data - NextJs biggest issue alert]
+  (revalidation) uses revalidatePath/Tag as long as its been done in a server action
+  also uses router.refresh or set/delete a cookie in a server action
+  (opt-out) not possible
+
+  When our site is SSG, if we change data on the database, it doesnt update on our static site cos of the "data cache" mechanism, so we can set it to dynamic
+
+  # Using ISR to manage caching:
+
+  we can set a time to revalidate our data depending on our frequently we want it.
+  we can also use revalidation at the component level or in our fetches (resembles PPR)
+
+  [NB:] you need to understand how the topics of "caching" and "static vs dynamic" rendering are tied and how they work.
+
+  My take on the above NB:
+  ISR seems like a cheat code to escape dynamic rendering
+  I think PPR would make things a lot better when stable
+  using revalidate is a lot better than noStore cos revalidate causes ISR but nostore opts out of Static.R and into Dynamic.R
+  the fact that caching only happensa in production makes me reluctant to test a lot of case scenarios 😅 but its fine, i get it (alhamduliLLah).
+
+  # Client and Server Interactions
+
+  # Blurring the Boundary btw server and client boundaries:
+
+  traditional developement separated backend from frontend
+
+  knitting is when we have server and client code interwoven
+
+  NextJS with RSC + SA (server actions) combines all in one codebase...
+  so we can have server and client components passing data to each other.
+
+  backend sends data to frontend as props
+  frontend sends data to backend as mutations using SA
+
+[NB:]
+
+- As we've discussed, we're not supposed to be able to render a sc from a cc but we can if we pass them as props and the cc should be in a sc that imports the sc rendered by the cc
+  (see screenshot) => so a CC can render a SC but it can not import a SC. +
+
+- Bcos a component is literally a blueprint, if we import a sc (by default) inside a cc, that sc would become a cc bcos every imported children component in a cc automatically becomes a cc.
+
+# Using Client C. in Server C. :
+
+easy
+
+always try to move cc down the component tree as possible
+
+# Passing data from Client.C to Server.C :
+
+easiest way is storing data in the url,
+we can pass them as queries into the url from cc and access them in the sc using "searchParams" (only works in page.js not any other sc)
+
+[NB:]
+Don't forget that using params or searchParams sets a page to dynamic rendering.
+we can have a server.c that is dynamically rendered but it would be hosted on serverless not cdn.
+are all cc dynamically rendered by default ? no, until the conditions that make it dynamic occur
+Link is a declarative way of navigating, useRouter is programmatic way
+We should add a key to our suspense so that when our content for some reasons (like navigation) is suspended, we see that spinner (fallback) for good UX cos if we dont add key it only works on initial render i guess.
+Hope we remeber that navigation causes re-render in server components which births line 1397
+#465 is an important lecture (sharing state btw server and clientf components)
+
+  <!-- ///////////////////////////////////////////////////// -->
 
 # Move to Node Documentation:
 
