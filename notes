@@ -1404,9 +1404,172 @@ Hope we remeber that navigation causes re-render in server components which birt
 
 # Rendering Server.C in Client.C
 
-pass sc as props to cc,.
+pass sc as props to cc, and ensure sc is imported in a parent sc not the cc, usually the parent sc that hosts the cc.
 
-  <!-- ///////////////////////////////////////////////////// -->
+# Data Fetching Strategies:
+
+as we've discussed, the idea is to fetch data in server components and pass the data as props to client components.
+
+In a case where we have a lot of fetches that block each other but do not rely on one another,
+we can use Promise.all to fetch all of them in parallel so that the total fetch is as fast as the slowest individual fetch.
+
+A much better approach is to create server components (that hosts the cc that needs the data) to fetch those data and stream them as they are fetched, so that it doesnt affect each other nor the whole page. Remember how we used suspense.? (See reservation.tsx)
+
+Take away:
+when you have some parts of your page that needs data, wrap the client.c's in a server.c and fetch in that server.c, then suspend the server.c with a fallback so its suspending doesnt affect the whole page
+
+Tips: Use shift+alt+O to get rid of unused imports.
+
+# Using ContextAPI for state management:
+
+Generally speaking, there are 3 ways to pass data around
+Url, Props, ContextAPI.
+
+A context provider should be placed as deep down the component tree as possible in order to not cause unnecessary re-renders...#
+
+So we can use context provider the same way we pass server.c as children props to client.c by creating our context component separate and then using it maybe inside our layout page so that the main part of our app is passed as children inside the context. Remember the server.c has already been generated and is just being passed as children props in the context
+
+Also note that, only the client components would be able to use the context data.
+
+If you change a context state, every client component (consuming data from context) in the tree is rerendered.
+
+# Creating API endpoints with Route Handlers:
+
+we use a convention file (route.js), we can use it in any folder but that folder must not have a page.js cos it usually returns a json data and page.js returns html so there will be a conflict.
+
+Note that the endpoint fns need to be named the method of the http verbs and not just any name.
+
+this approach is not that useful anymore cos we have server actions now.
+
+# Authentication with NextAuth:
+
+# Setting up NextAuth:
+
+actually called Auth.js now. its a library that makes authentication easy in Next (clerk,lucia is another alternative)
+
+setting up auth.js we need to specify some env variables
+
+Setting up Google Console:
+Create Project => API & Services => OAuth consent screen => User type(external)=>skip the rest (go to dashboard)
+[then under API & Services]
+Credentials => OAuth client ID => Application type (web application) => Authorized Javascript origins (base url), redirect url (base url/api/auth/callback/google)
+
+We need our google client id and secret in .env
+
+[...nextauth] is used as a catch all segment.
+
+Summary:
+Setup next-auth(auth.js) in a file.
+create api route to handle signin/signout (api/auth/[...nextauth])
+export get and post from api route file
+
+# Getting the User session:
+
+We get access to the user session by using the auth var gotten from called instance of NextAuth. And we can call this auth in our Server components.
+
+[NB:]
+calling the auth in any of our components makes it dynamic cos the auth reads some data from the cookies. and as we do it on the header, all the pages becomes dynamic basically.
+Its a good practice to always call the auth on the server.c
+
+# Middleware in NextJs:
+
+use cases: authentication, authorization, set cookies & headers, server side analytics, redirect based on geolocation, A/B testing...
+
+By default middleware runs before every route in a project but we can specify using a matcher
+
+Only one middleware fn needs to be exported from the middleware file in the root of the project
+
+middleware produces one of two responses (returns):
+
+- either send a response directly (json)
+- redirect/rewrite to a route
+
+# Protecting Route with NextAuth Middleware:
+
+we create the middleware file in the root of the project and use nextjs convention of naming the file "middleware.js".
+
+we need to add a matcher so that the middleware runs for only certain routes and not cause an infinite loop re-routing when we return a re-route
+
+the auth we export from next-auth also serves as a middleware and we can use it to handle authorization by protecting certain routes with it.
+BUT...
+we need to specify a callbacks in our authConfig inside the auth.js and set a condition to authorize access.
+
+To allow authorized redirect to custom login page, set in config in auth file
+
+Sneak Peak on Server Actions:
+allows us to add interactivity to server.c's (usually for forms)
+we set up a file for our server actions
+we need the "use server" in SA's
+SA's work in both sc and cc
+
+[NB:]
+To make nextauth use middleware to manage authorization, to use your own custom login page. You need to set it up in the config of auth.js
+
+# Creating new user on first sign in:
+
+we set a signin() in the config in auth that runs after we attempt to sign in but before the sign in happens (its a middleware).
+
+so in this signin, we create a user if they do not already exist.
+then we add another middleware(session) [it runs after the signin()] to set additional needed data into the session from the user info thats on our database.
+
+We need to do it in this 2 step (signin & session) bcos in the signin, the session has not been created yet.
+
+# Server Actions:
+
+server actions are the missing piece in the RSC architecture that enable interactive full-stack apps.
+While server components do data fetching, server actions do mutations.
+
+SA's are async fns that run on the server, allowing data mutations.
+
+They are either created inside sc's as async fns (and passed as props to cc) or in a standalone file [recommended] ('use server' at top of file)
+
+Normally, we cannot pass fns as props to cc's but sa's are an exception.
+
+# behind the scenes, next creates an api endpoint for each sa and when each fn is called, the code itself doesnt reach the client, only the endpoint, so its safe to use some private info on it.
+
+Unlike sc, sa requires the web to function, cos the endpoints are only called on a running web server
+
+SA can be called from: forms (sc & cc), event handlers (cc), useEffect (cc)
+
+In Server actions, we can:
+
+- Perform data mutations (create, update, delete)
+- Update UI with new data (revalidate cache with revalidatePath/revalidateTag)
+- Work with cookies and so on
+
+[NB:]
+Treat all inputs in a SA as unsafe (means to always verify inputs) and ensure user is authenticated. (in our case)
+Its a common pracice to just throw errors in SA's rather than using trycatch block cos the errors would just be caught by the closest error boundary
+
+The browser cache gives us an issue of displaying stale data when we update the form and move around bcos of the 30seconds (dynamic) and 5 minutes (static) timeout nextjs sets. remember. solution is 👇
+
+# Manual cache revalidation:
+
+remember we have time-based and on-demand.
+In a form update we want on-demand and a way to do it is "revalidatePath()"
+
+Its more or less a practice to revalidate cache in server actions (if we need to)
+
+# Displaying a loading indicator:
+
+useFormStatus: this react-dom hook must be used not inside the form but inside a component rendered inside the form.
+
+useTransition: allows us to mark a state update as a transition, and the state update doesnt block the UI. In NextJs, we use useTransition to mark a SA as a state update.
+
+the hook above works cos as we've discussed earlier that all navigations are wrapped into transitions by default.
+
+[NB:]
+Security issue: we can actually get the cURL data from our network tab and maliciously delete any booking from our table and we need to protect this (by ensuring the user can only manipulate thier own data)
+
+# useOptimistic hook: (to improve UX)
+
+a trick we use to improve the percieved performance of a UI.
+
+We are optimistic about an action and we already display the ui even before the action is successfuil. e.g a delete action.
+
+See reservationList component for how to use the hook
+
+<!-- ///////////////////////////////////////////////////// -->
 
 # Move to Node Documentation:
 
