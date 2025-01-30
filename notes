@@ -1452,7 +1452,7 @@ setting up auth.js we need to specify some env variables
 Setting up Google Console:
 Create Project => API & Services => OAuth consent screen => User type(external)=>skip the rest (go to dashboard)
 [then under API & Services]
-Credentials => OAuth client ID => Application type (web application) => Authorized Javascript origins (base url), redirect url (base url/api/auth/callback/google)
+Credentials (create) => OAuth client ID => Application type (web application) => Authorized Javascript origins (base url), redirect url (base url/api/auth/callback/google)
 
 We need our google client id and secret in .env
 
